@@ -91,7 +91,9 @@ export default function SignUpScreen() {
     }
   };
 
-  const handleSignIn = async () => {};
+  const handleSignUp = () => {
+    router.push("/(routes)/verifyAccount");
+  };
 
   return (
     <LinearGradient
@@ -195,7 +197,7 @@ export default function SignUpScreen() {
                 backgroundColor: "#2467EC",
                 marginTop: 35,
               }}
-              onPress={handleSignIn}
+              onPress={handleSignUp}
             >
               {buttonSpinner ? (
                 <ActivityIndicator size="small" color={"white"} />
