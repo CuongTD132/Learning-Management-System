@@ -31,10 +31,14 @@ import {
 import { useState } from "react";
 import { commonStyles } from "@/styles/common/common.styles";
 import { router } from "expo-router";
-
+import axios from "axios";
+import { SERVER_URI } from "@/utils/uri";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useToast } from "react-native-toast-notifications";
 export default function SignUpScreen() {
   const [isPasswordVisible, setPasswordVisible] = useState(false);
   const [buttonSpinner, setButtonSpinner] = useState(false);
+  const toast = useToast();
   const [userInfo, setUserInfo] = useState({
     name: "",
     email: "",
@@ -91,8 +95,32 @@ export default function SignUpScreen() {
     }
   };
 
-  const handleSignUp = () => {
-    router.push("/(routes)/verifyAccount");
+  const handleSignUp = async () => {
+    setButtonSpinner(true);
+    await axios
+      .post(`${SERVER_URI}/registration`, {
+        name: userInfo.name,
+        email: userInfo.email,
+        password: userInfo.password,
+      })
+      .then(async (res) => {
+        await AsyncStorage.setItem(
+          "activation_token",
+          res.data.activationToken
+        );
+        toast.show(res.data.message, { type: "success" });
+        setUserInfo({
+          name: "",
+          email: "",
+          password: "",
+        });
+        setButtonSpinner(false);
+        router.push("/(routes)/verifyAccount");
+      })
+      .catch((error) => {
+        setButtonSpinner(false);
+        toast.show("Email already exist!", { type: "danger" });
+      });
   };
 
   return (
@@ -133,6 +161,7 @@ export default function SignUpScreen() {
             <TextInput
               style={[styles.input, { paddingLeft: 40 }]}
               keyboardType="email-address"
+              autoCapitalize="none"
               value={userInfo.email}
               placeholder="example@gmail.com"
               onChangeText={(value) =>

@@ -30,6 +30,10 @@ import {
 import { useState } from "react";
 import { commonStyles } from "@/styles/common/common.styles";
 import { router } from "expo-router";
+import axios from "axios";
+import { SERVER_URI } from "@/utils/uri";
+import { Toast } from "react-native-toast-notifications";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 export default function LoginScreen() {
   const [isPasswordVisible, setPasswordVisible] = useState(false);
   const [buttonSpinner, setButtonSpinner] = useState(false);
@@ -87,7 +91,27 @@ export default function LoginScreen() {
     }
   };
 
-  const handleSignIn = () => {};
+  const handleSignIn = async () => {
+    setButtonSpinner(true);
+    await axios
+      .post(`${SERVER_URI}/login`, {
+        email: userInfo.email,
+        password: userInfo.password,
+      })
+      .then(async (res) => {
+        await AsyncStorage.setItem("access_token", res.data.accessToken);
+        await AsyncStorage.setItem("refresh_token", res.data.refreshToken);
+        setButtonSpinner(false);
+        router.push("/(tabs)");
+      })
+      .catch((e) => {
+        setButtonSpinner(false);
+        console.log(e, userInfo);
+        Toast.show("Email or password is not correct!", {
+          type: "danger",
+        });
+      });
+  };
   return (
     <LinearGradient
       colors={["#E5ECF9", "#F6F7F9"]}
@@ -111,6 +135,7 @@ export default function LoginScreen() {
               keyboardType="email-address"
               placeholder="example@gmail.com"
               value={userInfo.email}
+              autoCapitalize="none"
               onChangeText={(value) =>
                 setUserInfo({ ...userInfo, email: value })
               }

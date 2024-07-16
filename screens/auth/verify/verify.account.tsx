@@ -8,6 +8,10 @@ import {
 } from "react-native";
 import React, { createRef, useRef, useState } from "react";
 import { router } from "expo-router";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import axios from "axios";
+import { SERVER_URI } from "@/utils/uri";
+import { Toast } from "react-native-toast-notifications";
 
 export default function VerifyAccountScreen() {
   const [code, setCode] = useState(new Array(4).fill(""));
@@ -27,7 +31,33 @@ export default function VerifyAccountScreen() {
     }
   };
 
-  const handleSumbit = () => {};
+  const handleSumbit = async () => {
+    const opt = code.join("");
+    const activation_token = await AsyncStorage.getItem("activation_token");
+    await axios
+      .post(`${SERVER_URI}/activate-user`, {
+        activation_token,
+        activation_code: opt,
+      })
+      .then(() => {
+        Toast.show("Your account activated successfully!", {
+          type: "success",
+        });
+        setCode(new Array(4).fill(""));
+        router.push("/(routes)/login");
+      })
+      .catch(() => {
+        if (opt.length < 3) {
+          Toast.show("Your OTP is not valid!", {
+            type: "danger",
+          });
+          return;
+        }
+        Toast.show("Your OTP is not valid or expired!", {
+          type: "danger",
+        });
+      });
+  };
   return (
     <View style={styles.container}>
       <Text style={styles.headerText}>Verification Code</Text>
