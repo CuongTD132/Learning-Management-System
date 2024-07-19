@@ -3,8 +3,6 @@ import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect, useState } from "react";
 import "react-native-reanimated";
-import { View } from "react-native";
-import OnBoarding from "./(routes)/onboarding";
 import { Stack } from "expo-router";
 import { ToastProvider } from "react-native-toast-notifications";
 import TabLayout from "./(tabs)/_layout";
@@ -54,7 +52,7 @@ function RootLayoutNav() {
           <Stack.Screen name="(routes)/login/index" />
           <Stack.Screen name="(routes)/sign-up/index" />
           <Stack.Screen name="(routes)/forgot-password/index" />
-          <Stack.Screen name="(routes)/verifyAccount/index" />
+          <Stack.Screen name="(routes)/course-details/index" />
         </Stack>
       )}
     </ToastProvider>
